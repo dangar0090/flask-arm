@@ -6,6 +6,7 @@ WORKDIR /app
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
     libpq-dev \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -21,14 +22,14 @@ FROM --platform=linux/arm/v7 python:3.6-slim-buster
 
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /usr/local/lib/python3.6/site-packages /usr/local/lib/python3.6/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy installed Python packages from builder stage
+COPY --from=builder /usr/local/lib/python3.6/site-packages /usr/local/lib/python3.6/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY . .
